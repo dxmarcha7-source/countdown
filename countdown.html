@@ -2,66 +2,61 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <title>Working Day D-Day Countdown (Compact)</title>
+  <title>Working Day D-Day Countdown (2x Size)</title>
   <style>
     body {
       margin: 0;
       padding: 0;
       display: flex;
-      justify-content: flex-start;
-      align-items: flex-start;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
       background: transparent;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
-    .countdown-wrapper {
-      position: relative;
-      display: inline-block;
-    }
-
     .countdown-container {
       display: flex;
-      gap: 8px;            /* 박스 사이 간격 */
+      gap: 48px; /* 기존 24px → 2배 */
     }
 
     .time-item {
       display: flex;
       flex-direction: column;
       align-items: center;
-      perspective: 300px;
+      perspective: 900px; /* 원근감도 약간 증가 */
     }
 
     .time-box {
-      width: 50px;
-      height: 50px;
+      width: 180px;   /* 기존 90px → 2배 */
+      height: 180px;  /* 기존 90px → 2배 */
       background: #1e40af;
       color: #ffffff;
       display: flex;
       justify-content: center;
       align-items: center;
-      font-size: 44px; 
+      font-size: 84px; /* 기존 42px → 2배 */
       font-weight: 600;
       box-sizing: border-box;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-      border-radius: 4px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.25);
 
       transform-origin: center center;
       backface-visibility: hidden;
     }
 
     .time-label {
-      margin-top: 4px;
-      font-size: 22px;
-      color: #444444;
-      white-space: nowrap;
+      margin-top: 16px; /* 기존 8px → 2배 */
+      font-size: 32px;  /* 기존 16px → 2배 */
+      color: #333333;
     }
 
     .number {
       display: block;
     }
 
+    /* 중앙 기준 플립 애니메이션 */
     .flip {
-      animation: flip 0.4s ease-in-out;
+      animation: flip 0.6s ease-in-out; /* 약간 더 여유 있는 속도 */
     }
 
     @keyframes flip {
@@ -73,39 +68,33 @@
   </style>
 </head>
 <body>
-
-  <div class="countdown-wrapper">
-    <div class="countdown-container">
-
-      <div class="time-item">
-        <div class="time-box" id="daysBox" data-value="00">
-          <span class="number" id="daysNumber">00</span>
-        </div>
-        <div class="time-label">Days</div>
+  <div class="countdown-container">
+    <div class="time-item">
+      <div class="time-box" id="daysBox" data-value="00">
+        <span class="number" id="daysNumber">00</span>
       </div>
+      <div class="time-label">Days</div>
+    </div>
 
-      <div class="time-item">
-        <div class="time-box" id="hoursBox" data-value="00">
-          <span class="number" id="hoursNumber">00</span>
-        </div>
-        <div class="time-label">Hours</div>
+    <div class="time-item">
+      <div class="time-box" id="hoursBox" data-value="00">
+        <span class="number" id="hoursNumber">00</span>
       </div>
+      <div class="time-label">Hours</div>
+    </div>
 
-      <div class="time-item">
-        <div class="time-box" id="minutesBox" data-value="00">
-          <span class="number" id="minutesNumber">00</span>
-        </div>
-        <div class="time-label">Mins</div>
+    <div class="time-item">
+      <div class="time-box" id="minutesBox" data-value="00">
+        <span class="number" id="minutesNumber">00</span>
       </div>
-
+      <div class="time-label">Mins</div>
     </div>
   </div>
 
   <script>
-    /* 목표일 (KST 기준) */
+    /* 🔧 목표일 및 공휴일 설정 */
     const target = new Date("2026-03-31T00:00:00+09:00");
 
-    /* 한국 공휴일 */
     const holidayStrings = [
       "2026-02-16",
       "2026-02-17",
@@ -125,7 +114,7 @@
     }
 
     function isWorkingDay(date) {
-      const day = date.getDay();
+      const day = date.getDay(); // 0 일요일, 6 토요일
       if (day === 0 || day === 6) return false;
       for (const h of holidays) {
         if (isSameDate(date, h)) return false;
@@ -140,7 +129,6 @@
 
       let count = 0;
       const cur = new Date(start);
-
       while (cur <= end) {
         if (isWorkingDay(cur)) count++;
         cur.setDate(cur.getDate() + 1);
@@ -151,6 +139,7 @@
     function animateFlip(boxEl, numberEl, newValue) {
       const formatted = String(newValue).padStart(2, "0");
       const oldValue = boxEl.dataset.value;
+
       if (oldValue === formatted) return;
 
       boxEl.dataset.value = formatted;
@@ -175,21 +164,20 @@
       if (diff < 0) diff = 0;
 
       const totalMinutes = Math.floor(diff / 1000 / 60);
-      const totalHours   = Math.floor(diff / 1000 / 60 / 60);
+      const totalHours = Math.floor(diff / 1000 / 60 / 60);
 
-      const hours   = totalHours % 24;
+      const hours = totalHours % 24;
       const minutes = totalMinutes % 60;
+
       const workingDays = getWorkingDaysBetween(now, target);
 
-      animateFlip(daysBox,   daysNumber,   workingDays);
-      animateFlip(hoursBox,  hoursNumber,  hours);
+      animateFlip(daysBox, daysNumber, workingDays);
+      animateFlip(hoursBox, hoursNumber, hours);
       animateFlip(minutesBox, minutesNumber, minutes);
     }
 
     updateCountdown();
     setInterval(updateCountdown, 1000);
   </script>
-
 </body>
 </html>
-
