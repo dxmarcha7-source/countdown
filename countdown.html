@@ -2,51 +2,66 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <title>Working Day D-Day Countdown</title>
+  <title>Working Day D-Day Countdown (2x Size)</title>
   <style>
     body {
       margin: 0;
       padding: 0;
       display: flex;
       justify-content: center;
-      align-items: center;
+      align-items: flex-start; 
       height: 100vh;
       background: transparent;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
+    /* 우측 상단 표시 텍스트 */
+    .top-label {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      font-size: 28px;           /* Days 폰트(84px)의 1/3 정도로 작게 */
+      font-weight: 600;
+      color: #cccccc;            /* 연한 회색 */
+      pointer-events: none;
+    }
+
+    .countdown-wrapper {
+      position: relative;
+    }
+
     .countdown-container {
       display: flex;
-      gap: 24px;
+      gap: 48px;
+      margin-top: 80px; /* 상단 텍스트와 간격 확보 */
     }
 
     .time-item {
       display: flex;
       flex-direction: column;
       align-items: center;
+      perspective: 900px;
     }
 
     .time-box {
-      width: 90px;
-      height: 90px;
+      width: 180px;
+      height: 180px;
       background: #1e40af;
       color: #ffffff;
       display: flex;
       justify-content: center;
       align-items: center;
-      font-size: 42px;
+      font-size: 84px;
       font-weight: 600;
       box-sizing: border-box;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-
-      /* 플립 애니메이션을 위한 설정 */
-      transform-origin: center bottom;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+      transform-origin: center center;
       backface-visibility: hidden;
     }
 
     .time-label {
-      margin-top: 8px;
-      font-size: 16px;
+      margin-top: 16px;
+      font-size: 32px;
       color: #333333;
     }
 
@@ -54,9 +69,8 @@
       display: block;
     }
 
-    /* 플립 애니메이션 */
     .flip {
-      animation: flip 0.5s ease-in-out;
+      animation: flip 0.6s ease-in-out;
     }
 
     @keyframes flip {
@@ -68,37 +82,43 @@
   </style>
 </head>
 <body>
-  <div class="countdown-container">
-    <div class="time-item">
-      <div class="time-box" id="daysBox" data-value="0">
-        <span class="number" id="daysNumber">0</span>
+
+  <!-- 오른쪽 상단 텍스트 -->
+  <div class="top-label">(영업일 기준)</div>
+
+  <div class="countdown-wrapper">
+    <div class="countdown-container">
+      <div class="time-item">
+        <div class="time-box" id="daysBox" data-value="00">
+          <span class="number" id="daysNumber">00</span>
+        </div>
+        <div class="time-label">Days</div>
       </div>
-      <div class="time-label">Days</div>
-    </div>
-    <div class="time-item">
-      <div class="time-box" id="hoursBox" data-value="0">
-        <span class="number" id="hoursNumber">0</span>
+
+      <div class="time-item">
+        <div class="time-box" id="hoursBox" data-value="00">
+          <span class="number" id="hoursNumber">00</span>
+        </div>
+        <div class="time-label">Hours</div>
       </div>
-      <div class="time-label">Hours</div>
-    </div>
-    <div class="time-item">
-      <div class="time-box" id="minutesBox" data-value="0">
-        <span class="number" id="minutesNumber">0</span>
+
+      <div class="time-item">
+        <div class="time-box" id="minutesBox" data-value="00">
+          <span class="number" id="minutesNumber">00</span>
+        </div>
+        <div class="time-label">Mins</div>
       </div>
-      <div class="time-label">Mins</div>
     </div>
   </div>
 
   <script>
-    // 🔧 목표 시각: 2026-03-31 00:00 KST
     const target = new Date("2026-03-31T00:00:00+09:00");
 
-    // 🔧 한국 공휴일 리스트 (워킹데이에서 제외)
     const holidayStrings = [
       "2026-02-16",
       "2026-02-17",
       "2026-02-18",
-      "2026-03-02",
+      "2026-03-02"
     ];
 
     const holidays = holidayStrings.map(s => {
@@ -107,15 +127,13 @@
     });
 
     function isSameDate(a, b) {
-      return (
-        a.getFullYear() === b.getFullYear() &&
-        a.getMonth() === b.getMonth() &&
-        a.getDate() === b.getDate()
-      );
+      return a.getFullYear() === b.getFullYear() &&
+             a.getMonth() === b.getMonth() &&
+             a.getDate() === b.getDate();
     }
 
     function isWorkingDay(date) {
-      const day = date.getDay(); // 0:일, 6:토
+      const day = date.getDay();
       if (day === 0 || day === 6) return false;
       for (const h of holidays) {
         if (isSameDate(date, h)) return false;
@@ -123,15 +141,14 @@
       return true;
     }
 
-    // 오늘 날짜 ~ 목표 날짜까지 워킹데이 수 (양 끝 포함)
     function getWorkingDaysBetween(now, targetDate) {
       const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       const end = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate());
-
       if (end < start) return 0;
 
       let count = 0;
       const cur = new Date(start);
+
       while (cur <= end) {
         if (isWorkingDay(cur)) count++;
         cur.setDate(cur.getDate() + 1);
@@ -139,17 +156,17 @@
       return count;
     }
 
-    // 숫자 변경 시 플립 애니메이션
     function animateFlip(boxEl, numberEl, newValue) {
+      const formatted = String(newValue).padStart(2, "0");
       const oldValue = boxEl.dataset.value;
-      if (String(oldValue) === String(newValue)) return; // 값이 안 바뀌면 애니메이션 안 함
 
-      boxEl.dataset.value = newValue;
-      numberEl.textContent = newValue;
+      if (oldValue === formatted) return;
 
-      // 애니메이션 리셋 후 다시 적용
+      boxEl.dataset.value = formatted;
+      numberEl.textContent = formatted;
+
       boxEl.classList.remove("flip");
-      void boxEl.offsetWidth; // reflow 강제
+      void boxEl.offsetWidth;
       boxEl.classList.add("flip");
     }
 
